@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "version.h"
+#include "mimedictionary.h"
 
 class server
 {
@@ -30,6 +31,7 @@ class server
 	}
 	
 	private:
+	char *getExtension(char *file);
 	bool debugMode;
 	struct timeval tv;
 	int retval;
@@ -38,5 +40,6 @@ class server
 	char buffer[256];
 	struct sockaddr_in serverAddress, clientAddress;
 	bool connected;
+	mimedict *myMime;
 };
 #endif

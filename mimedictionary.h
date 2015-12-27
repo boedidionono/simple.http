@@ -8,18 +8,20 @@
 class mimedict
 {
 	private:
-		read();
+		int read();
 		typedef struct
 		{
 			char *type;
 			char *extension;
 		} mimeStruct;
-		mimestuct *mimeList;
+		mimeStruct *mimeList;
 		char *filePath;
+		bool debugMode;
+		size_t extNumber;
 		
 	public:
-		mimedict(char *path);
-		char *getType(char *extension);
+		mimedict(const char *path);
+		char *getType(const char *extension);
 		virtual ~mimedict()
 		{
 			

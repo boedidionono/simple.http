@@ -5,7 +5,6 @@
 #include "sServer.hpp"
 #include "confreader.h"
 #include "version.h"
-#include "mimedictionary.h"
 
 
 

@@ -5,7 +5,7 @@ server::server(int port, bool d)
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
 	debugMode = d;
-	
+	myMime = new mimedict("mimetype");
 	//1. create socket
 	sock_fileDes = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_fileDes < 0)
@@ -60,18 +60,17 @@ int server::return_file(char *path)
 	char * line = NULL;
 	size_t lineLen = 0;
 	ssize_t read;
-
 	fd = fopen(ppath, "r");
 	if (fd == NULL)
 	{
 		sprintf(buf,"HTTP/1.1 404 Not Found\r\nServer: boedh's webServer 0.1b\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n");
-		write(newsock_fileDes, buf, 102);
+		write(newsock_fileDes, buf, strlen(buf));
 		sprintf(buf,"<html><title>Error 404 Not Found</title><center><h1>Error 404 Not Found</h1> <br/><hr>Boedh Web Server/%s</center></html>", VERSION);
-		write(newsock_fileDes, buf, 128);
+		write(newsock_fileDes, buf, strlen(buf));
 		return -1;
 	}
-	sprintf(buf,"HTTP/1.1 200 OK\r\nServer: boedh's webServer 0.1b\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n");
-	write(newsock_fileDes, buf, 95);
+	sprintf(buf,"HTTP/1.1 200 OK\r\nServer: boedh's webServer 0.1b\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", myMime->getType(getExtension(ppath)));
+	write(newsock_fileDes, buf, strlen(buf));
 	
 	while ((read = getline(&line, &lineLen, fd)) != -1) {
 		write(newsock_fileDes, line, read);
@@ -97,4 +96,11 @@ void server::dispose_connection()
 uint32_t server::get_clientAddress()
 {
 	return clientAddress.sin_addr.s_addr;
+}
+
+
+char *server::getExtension(char *file)
+{
+	char *tmp = strrchr(file, '.');
+	return tmp;
 }
