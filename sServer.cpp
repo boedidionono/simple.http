@@ -28,7 +28,7 @@ server::server(int port, bool d)
 	}
 	
 	//3. listen 
-	listen(sock_fileDes, 10); //10=number connection that can be waiting while the process is handling a particular connection
+	listen(sock_fileDes, 1000); //10=number connection that can be waiting while the process is handling a particular connection
 	connected = false;
 }
 

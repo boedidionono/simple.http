@@ -13,6 +13,7 @@ int LISTEN_PORT;
 char *DOC_ROOT;
 bool debugMode=false;
 server *m_server;
+char *receivedData(char *_buffer, int method);
 
 void exitHandler(int sigNum)
 {
@@ -77,31 +78,64 @@ int main(int argc, char **argv)
 			{
 				char fileName[100], *stopptr, *startptr, *tmp;
 				DBG(buffer, debugMode);
-				startptr = strstr(buffer, "GET");
-				if(startptr == NULL)
+				if((startptr=strstr(buffer, "GET")) != NULL)
+				{
+					char *dataPass = receivedData(buffer, 1);
+					stopptr = strstr(buffer, "HTTP");
+					int start = startptr - buffer + 4;
+					int stop = stopptr - buffer - 1;
+					tmp = (char*)malloc(sizeof(char)*(stop-start)+1);
+					memset(tmp, '\0', sizeof(char)*(stop-start)+1);
+					memcpy(tmp, &buffer[start], stop-start);
+					sprintf(fileName,"%s%s",DOC_ROOT,tmp);
+					DBG(fileName, debugMode);
+					m_server->return_file(fileName);
+					todoRequest = false;
+					free(tmp);
+				}
+				else if((startptr=strstr(buffer, "POST")) != NULL)
+				{
+					char *dataPass = receivedData(buffer, 2);
+					stopptr = strstr(buffer, "HTTP");
+					int start = startptr - buffer + 5;
+					int stop = stopptr - buffer - 1;
+					tmp = (char*)malloc(sizeof(char)*(stop-start)+1);
+					memset(tmp, '\0', sizeof(char)*(stop-start)+1);
+					memcpy(tmp, &buffer[start], stop-start);
+					sprintf(fileName,"%s%s",DOC_ROOT,tmp);
+					DBG(fileName, debugMode);
+					m_server->return_file(fileName);
+					todoRequest = false;
+					free(tmp);
+				}
+				else
 				{
 					todoRequest = false;
 					memset(buffer, '\0',sizeof(char)*(1024));
 					continue;
 				}
-				stopptr = strstr(buffer, "HTTP");
-				int start = startptr - buffer + 4;
-				int stop = stopptr - buffer - 1;
-				//fileName = (char*)malloc(sizeof(char)*(stop-start)+1+strlen(DOC_ROOT));
-				tmp = (char*)malloc(sizeof(char)*(stop-start)+1);
-				memset(tmp, '\0', sizeof(char)*(stop-start)+1);
-				memcpy(tmp, &buffer[start], stop-start);
-				sprintf(fileName,"%s%s",DOC_ROOT,tmp);
-				DBG(fileName, debugMode);
-				m_server->return_file(fileName);
-				todoRequest = false;
-				//free(fileName);
-				free(tmp);
-				memset(buffer, '\0',sizeof(char)*(1024));
 			}
 			else
 				m_server->dispose_connection();
+			
+			memset(buffer, '\0',sizeof(char)*(1024));
 		}
 	}
 	return 0;
+}
+
+char *receivedData(char *_buffer, int method)
+{
+	char *tmp;
+	if(method == 1)
+	{
+		if((tmp = strstr(_buffer, "?")) != NULL)
+			tmp +=1;
+	}
+	else if(method == 2)
+	{
+		if((tmp = strstr(_buffer, "\\r\\n\\r\\n")) != NULL)
+			tmp +=8;
+	}
+	return tmp;
 }

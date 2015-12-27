@@ -62,7 +62,7 @@ int mimedict::read()
 
 char *mimedict::getType(const char *extension)
 {
-	char *tmp = NULL;
+	char *tmp = "*/*";
 	for(size_t i = 0; i < extNumber; i++)
 	{
 		if(strstr(mimeList[i].extension, extension) != NULL)
